@@ -4,7 +4,6 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import pandas as pd
 import os
-import missingno as msno
 
 
 def generate_charts(df):
@@ -29,14 +28,19 @@ def generate_charts(df):
     for col in numeric_cols[:3]:
 
         plt.figure(figsize=(8, 5))
+
         df[col].dropna().hist(bins=20)
+
         plt.title(f'Distribution - {col}')
 
         filename = f'static/charts/chart_{chart_index}.png'
+
         plt.savefig(filename)
+
         plt.close()
 
         chart_paths.append(filename)
+
         chart_index += 1
 
     # Bar charts for first 2 categorical columns
@@ -47,14 +51,19 @@ def generate_charts(df):
         if len(value_counts) > 0:
 
             plt.figure(figsize=(8, 5))
+
             value_counts.plot(kind='bar')
+
             plt.title(f'Category Distribution - {col}')
 
             filename = f'static/charts/chart_{chart_index}.png'
+
             plt.savefig(filename)
+
             plt.close()
 
             chart_paths.append(filename)
+
             chart_index += 1
 
     # Scatter Plot
@@ -68,14 +77,19 @@ def generate_charts(df):
         )
 
         plt.xlabel(numeric_cols[0])
+
         plt.ylabel(numeric_cols[1])
+
         plt.title('Scatter Plot')
 
         filename = f'static/charts/chart_{chart_index}.png'
+
         plt.savefig(filename)
+
         plt.close()
 
         chart_paths.append(filename)
+
         chart_index += 1
 
     # Correlation Heatmap
@@ -84,30 +98,63 @@ def generate_charts(df):
         corr = df[numeric_cols].corr()
 
         plt.figure(figsize=(10, 6))
-        plt.imshow(corr, interpolation='nearest', cmap='coolwarm')
+
+        plt.imshow(
+            corr,
+            interpolation='nearest',
+            cmap='coolwarm'
+        )
+
         plt.colorbar()
 
-        plt.xticks(range(len(corr.columns)), corr.columns, rotation=90)
-        plt.yticks(range(len(corr.columns)), corr.columns)
+        plt.xticks(
+            range(len(corr.columns)),
+            corr.columns,
+            rotation=90
+        )
+
+        plt.yticks(
+            range(len(corr.columns)),
+            corr.columns
+        )
 
         plt.title('Correlation Heatmap')
 
         filename = f'static/charts/chart_{chart_index}.png'
+
         plt.tight_layout()
+
         plt.savefig(filename)
+
         plt.close()
 
         chart_paths.append(filename)
+
         chart_index += 1
 
-    # Missing Values Map
-    plt.figure(figsize=(10, 5))
-    msno.matrix(df)
+    # Missing Values Chart
+    missing = df.isnull().sum()
 
-    filename = f'static/charts/chart_{chart_index}.png'
-    plt.savefig(filename)
-    plt.close()
+    missing = missing[missing > 0]
 
-    chart_paths.append(filename)
+    if len(missing) > 0:
+
+        plt.figure(figsize=(10, 5))
+
+        missing.sort_values(
+            ascending=False
+        ).plot(kind='bar')
+
+        plt.title('Missing Values')
+
+        filename = f'static/charts/chart_{chart_index}.png'
+
+        plt.tight_layout()
+
+        plt.savefig(filename)
+
+        plt.close()
+
+        chart_paths.append(filename)
 
     return chart_paths
